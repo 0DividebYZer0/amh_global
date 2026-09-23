@@ -62,8 +62,8 @@ export const RfqModal: React.FC<RfqModalProps> = ({
           <div className="flex items-center gap-2.5">
             <Truck className="w-5 h-5 text-emerald-400" />
             <div>
-              <h3 className="font-bold text-base">Bulk B2B Freight RFQ</h3>
-              <p className="text-[11px] text-slate-400">Direct Commercial Quotation from Barkly West Processing</p>
+              <h3 className="font-bold text-base">Pan-African Bulk B2B Freight RFQ</h3>
+              <p className="text-[11px] text-emerald-300">Commercial Quotation from Dual Hubs: Ghana &amp; South Africa</p>
             </div>
           </div>
           <button
@@ -140,35 +140,78 @@ export const RfqModal: React.FC<RfqModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Requested Volume / Tonnage</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. 5× 25L Drums or 500kg"
-                value={volume}
-                onChange={(e) => setVolume(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
-              />
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-700">Requested Volume / Tonnage *</label>
+              <span className="text-[10px] text-slate-400">Quick wholesale presets:</span>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Target Budget (ZAR)</label>
-              <input
-                type="text"
-                placeholder="e.g. R 85,000"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
-              />
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {[
+                '100kg Bulk Moringa Seeds (PKM-1)',
+                '100kg Bulk Moringa Seeds (PKM-2)',
+                '100kg Bulk Organic Leaf Powder',
+                '100kg Bulk Whole Dried Leaves',
+                '100kg Bulk Crushed Tea Leaves',
+                '25L UN Commercial Drum Oil',
+                '200L Industrial Drum Oil',
+                '1,000L IBC Bulk Oil Tote'
+              ].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setVolume(preset)}
+                  className={`text-[10px] px-2 py-1 rounded-md border font-medium transition-colors ${
+                    volume === preset
+                      ? 'bg-emerald-900 text-white border-emerald-900'
+                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 5× 100kg Sacks or 4× 25L Drums"
+                  value={volume}
+                  onChange={(e) => setVolume(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Target Budget e.g. R 85,000"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
+                />
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Application & Delivery Logistics</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Preferred Dispatch Hub &amp; Trade Corridor
+            </label>
+            <select
+              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white text-slate-800"
+              defaultValue="auto"
+            >
+              <option value="auto">Nearest African Hub (Lowest Freight &amp; Lead Time)</option>
+              <option value="ghana">Accra Centralized Hub, Ghana (West Africa / ECOWAS / Tema Port)</option>
+              <option value="sa">Barkly West Agro-Processing, South Africa (Southern Africa / SADC / Durban Port)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Application, Destination Country &amp; Logistics</label>
             <textarea
               rows={3}
-              placeholder="Detail your intended use (cosmetics, nutritional blend, export) and destination city for freight calculation..."
+              placeholder="Detail your intended application (cosmetics, pharmaceutical, food blend), destination African or international port/city, and required AfCFTA / phytosanitary certificates..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"

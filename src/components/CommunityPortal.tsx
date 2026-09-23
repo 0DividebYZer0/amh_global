@@ -16,6 +16,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { IksArticle } from '../types';
+import { usePlainLanguage } from '../context/PlainLanguageContext';
 
 interface CommunityPortalProps {
   elderName: string;
@@ -42,6 +43,7 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
   onSubmitWisdom,
   onShowToast
 }) => {
+  const { isPlainLanguage, simplify } = usePlainLanguage();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [traditionalName, setTraditionalName] = useState('Crushed Seed Flocculation for Murky Water');
   const [elderSpeaker, setElderSpeaker] = useState(elderName);
@@ -66,7 +68,9 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
     }
     const text =
       customText ||
-      `Dumelang and welcome ${elderName}. This is the Indigenous Knowledge Systems sanctuary of AMH Global Traders. Here, our traditional African plant wisdom is preserved with honor and community consent. You can listen to recorded oral teachings, submit traditional preparation knowledge, or request free planting seedlings for your community garden.`;
+      (isPlainLanguage
+        ? `Dumelang and welcome ${elderName}. This is the traditional plant wisdom home of AMH Global Traders. Here, our African elders' plant knowledge is preserved with deep respect and tribal consent. You can listen to recorded teachings from wise elders, share traditional recipes, or request free young moringa trees for your community school garden.`
+        : `Dumelang and welcome ${elderName}. This is the Indigenous Knowledge Systems sanctuary of AMH Global Traders. Here, our traditional African plant wisdom is preserved with honor and community consent. You can listen to recorded oral teachings, submit traditional preparation knowledge, or request free planting seedlings for your community garden.`);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.88; // calm, clear pace
     utterance.onend = () => setIsSpeaking(false);
@@ -108,7 +112,7 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="bg-amber-500/20 text-amber-200 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-amber-500/40">
-                  Indigenous Knowledge Systems (IKS) Sanctuary
+                  {simplify('Indigenous Knowledge Systems (IKS) Sanctuary', 'Traditional Plant Wisdom & Natural Heritage')}
                 </span>
                 <span className="text-xs text-amber-200 flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" /> {region}
@@ -118,7 +122,10 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
                 Welcome, {elderName}
               </h1>
               <p className="text-amber-100 text-sm sm:text-base max-w-xl font-medium leading-relaxed">
-                Thank you for guarding the botanical heritage of our elders. Here, traditional knowledge is respected, recorded with Prior Informed Consent (PIC), and protected under the Nagoya Protocol.
+                {simplify(
+                  'Thank you for guarding the botanical heritage of our elders. Here, traditional knowledge is respected, recorded with Prior Informed Consent (PIC), and protected under the Nagoya Protocol.',
+                  'Thank you for protecting the plant wisdom of our elders. Here, traditional medicine and nature knowledge is respected, recorded with elder consent, and protected under fair community benefit sharing.'
+                )}
               </p>
             </div>
 
@@ -147,10 +154,13 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                  Record Traditional Plant Knowledge
+                  {simplify('Record Traditional Plant Knowledge', 'Share Elder Plant Wisdom & Remedies')}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600">
-                  Preserve traditional preparation, dawn harvesting, or natural healing methods for future generations.
+                  {simplify(
+                    'Preserve traditional preparation, dawn harvesting, or natural healing methods for future generations.',
+                    'Keep safe our traditional remedies, dawn harvesting, and natural healing methods for our children.'
+                  )}
                 </p>
               </div>
             </div>
@@ -215,7 +225,10 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
                     className="w-5 h-5 rounded border-amber-400 text-amber-700 mt-0.5"
                   />
                   <span className="text-xs text-slate-800 font-medium leading-snug">
-                    I confirm that this knowledge is shared with free, prior, and informed consent (PIC) on behalf of our community elders. AMH Global Traders pledges to attribute the knowledge and direct fair-share benefits back to rural communities.
+                    {simplify(
+                      'I confirm that this knowledge is shared with free, prior, and informed consent (PIC) on behalf of our community elders. AMH Global Traders pledges to attribute the knowledge and direct fair-share benefits back to rural communities.',
+                      'I confirm that this plant knowledge is shared with full permission from our community elders. AMH Global Traders pledges to give credit to our elders and direct fair financial benefits back to our rural community.'
+                    )}
                   </span>
                 </label>
               </div>
@@ -225,7 +238,7 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
                 className="w-full py-4 bg-amber-800 hover:bg-amber-700 text-white font-extrabold text-base rounded-2xl shadow-md transition-transform hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Send className="w-5 h-5" />
-                <span>Submit to Elder Advisory Council</span>
+                <span>{simplify('Submit to Elder Advisory Council', 'Submit to Elder Advisory Council')}</span>
               </button>
             </form>
           </div>
@@ -239,9 +252,11 @@ export const CommunityPortal: React.FC<CommunityPortalProps> = ({
                 <Sprout className="w-6 h-6 text-emerald-600" />
                 <div>
                   <h4 className="text-base font-bold text-slate-900">
-                    Free Community Seedling Grant
+                    {simplify('Free Community Seedling Grant', 'Free Young Moringa Trees for Community')}
                   </h4>
-                  <p className="text-xs text-slate-500">Provided free by AMH for community schools and clinics</p>
+                  <p className="text-xs text-slate-500">
+                    {simplify('Provided free by AMH for community schools and clinics', 'Given free by AMH for village schools, clinics, and family gardens')}
+                  </p>
                 </div>
               </div>
 

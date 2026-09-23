@@ -12,14 +12,18 @@ import {
   Flame,
   ArrowRight,
   TrendingUp,
-  Bookmark
+  Bookmark,
+  Ticket,
+  QrCode,
+  MapPin
 } from 'lucide-react';
-import { UserProgress, CourseModule, Order } from '../types';
+import { UserProgress, CourseModule, Order, EventTicket } from '../types';
 
 interface StudentPortalProps {
   progress: UserProgress;
   modules: CourseModule[];
   orders: Order[];
+  tickets?: EventTicket[];
   userName: string;
   userEmail: string;
   onOpenPlayer: () => void;
@@ -32,6 +36,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
   progress,
   modules,
   orders,
+  tickets = [],
   userName,
   userEmail,
   onOpenPlayer,
@@ -39,7 +44,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
   onViewInvoice,
   onShowToast
 }) => {
-  const [activeTab, setActiveTab] = useState<'roadmap' | 'library' | 'notes' | 'orders'>('roadmap');
+  const [activeTab, setActiveTab] = useState<'roadmap' | 'library' | 'notes' | 'orders' | 'tickets'>('roadmap');
 
   const notes: Record<number, string> = (() => {
     try {
@@ -184,6 +189,17 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
         >
           <Receipt className="w-4 h-4" />
           <span>Invoices & Orders ({orders.length})</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('tickets')}
+          className={`pb-3 text-xs font-bold transition-colors border-b-2 flex items-center gap-1.5 ${
+            activeTab === 'tickets'
+              ? 'border-emerald-700 text-emerald-950'
+              : 'border-transparent text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <Ticket className="w-4 h-4" />
+          <span>Event Tickets & Passes ({tickets.length})</span>
         </button>
       </div>
 
@@ -386,6 +402,79 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'tickets' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-base text-slate-900">Your Registered Passes & Summit Tickets</h3>
+            <span className="text-xs text-slate-500">{tickets.length} Confirmed Passes</span>
+          </div>
+
+          {tickets.length === 0 ? (
+            <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
+              No event registrations found. Browse the Academy & Summits tab to book masterclass passes.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {tickets.map((t) => (
+                <div
+                  key={t.ticketId}
+                  className="bg-white rounded-2xl border-2 border-emerald-200/80 p-6 shadow-xs flex flex-col justify-between space-y-4 relative overflow-hidden"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-mono font-bold uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                          {t.tier} · {t.status}
+                        </span>
+                        <h4 className="font-black text-base text-slate-900 mt-1 leading-snug">
+                          {t.eventTitle}
+                        </h4>
+                      </div>
+                      <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 shrink-0 flex flex-col items-center">
+                        <QrCode className="w-10 h-10 text-slate-800" />
+                        <span className="text-[8px] font-mono text-slate-400 mt-0.5">Verified</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100">
+                      <div>
+                        <span className="text-slate-400 text-[10px] block">Pass ID:</span>
+                        <span className="font-mono font-bold text-emerald-950">{t.ticketId}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 text-[10px] block">Attendee:</span>
+                        <span className="font-bold text-slate-800 truncate block">{t.attendeeName}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 text-[10px] block">Date & Time:</span>
+                        <span className="text-slate-700">{t.date} · {t.time}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 text-[10px] block">Access Format:</span>
+                        <span className="text-slate-700 truncate block">{t.platformOrLocation}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="font-mono font-bold text-slate-900">
+                      {t.price === 0 ? 'Complimentary' : `R ${t.price.toFixed(2)}`}
+                    </span>
+                    <button
+                      onClick={() => onShowToast(`Ticket ${t.ticketId} ready for check-in.`)}
+                      className="py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-emerald-900 text-white font-bold text-xs transition-colors flex items-center gap-1.5"
+                    >
+                      <Ticket className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Display Gate Pass</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

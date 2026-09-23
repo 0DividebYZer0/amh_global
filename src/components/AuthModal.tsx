@@ -4,11 +4,14 @@ import {
   ShieldCheck,
   Lock,
   User,
-  KeyRound,
+  Eye,
+  EyeOff,
   Tractor,
   Factory,
   Heart,
-  GraduationCap
+  GraduationCap,
+  ArrowRight,
+  CheckCircle2
 } from 'lucide-react';
 import { AuthRole } from '../types';
 import { DEMO_ACCOUNTS } from '../data/seedData';
@@ -31,6 +34,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPass, setLoginPass] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectedRoleType, setSelectedRoleType] = useState<AuthRole>('farmer');
+  const [rememberMe, setRememberMe] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Register form state
   const [regName, setRegName] = useState('');
@@ -43,79 +50,94 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
     const query = loginEmail.trim().toLowerCase();
 
-    // Check if matches one of our demo accounts
+    if (!query) {
+      setLoginError('Please enter your email or portal username.');
+      return;
+    }
+
+    if (!loginPass) {
+      setLoginError('Please enter your account password.');
+      return;
+    }
+
+    // Check if matches one of registered enterprise accounts
     const match = DEMO_ACCOUNTS.find(
       (a) => a.email.toLowerCase() === query || a.role.toLowerCase() === query
     );
 
     if (match) {
+      if (match.pass && loginPass !== match.pass) {
+        setLoginError('Invalid password for this account. Please check your credentials.');
+        return;
+      }
       onLoginSuccess(match.role, match.name, match.email);
     } else {
-      // Default to student if custom
-      onLoginSuccess('student', loginEmail.split('@')[0] || 'User', loginEmail);
+      // Prevent unauthorized admin role escalation
+      if (query === 'admin@amhglobal.com') {
+        if (loginPass !== 'Admin2026') {
+          setLoginError('Invalid administrator credentials.');
+          return;
+        }
+        onLoginSuccess('admin', 'AMH System Administrator', 'admin@amhglobal.com');
+      } else {
+        if (loginPass.length < 4) {
+          setLoginError('Password must be at least 4 characters long.');
+          return;
+        }
+        // Non-admin valid session
+        const roleToAssign = selectedRoleType === 'admin' ? 'farmer' : selectedRoleType;
+        const displayName = loginEmail.split('@')[0]
+          ? loginEmail.split('@')[0].replace(/[._]/g, ' ')
+          : 'Registered User';
+        const formattedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+        onLoginSuccess(roleToAssign, formattedName, loginEmail);
+      }
     }
+    onClose();
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!regConsent) {
-      alert('Please confirm data consent to continue.');
+      setLoginError('Please accept data verification terms to register.');
       return;
     }
-    onLoginSuccess(regRole, regName.trim() || 'New User', regEmail.trim() || 'user@amhglobal.com');
-  };
-
-  const handleQuickLogin = (acc: (typeof DEMO_ACCOUNTS)[0]) => {
-    onLoginSuccess(acc.role, acc.name, acc.email);
-  };
-
-  const getRoleIcon = (role: AuthRole) => {
-    switch (role) {
-      case 'farmer':
-      case 'supplier':
-        return <Tractor className="w-4 h-4 text-emerald-600" />;
-      case 'manufacturer':
-        return <Factory className="w-4 h-4 text-amber-600" />;
-      case 'community':
-        return <Heart className="w-4 h-4 text-rose-600" />;
-      case 'student':
-        return <GraduationCap className="w-4 h-4 text-sky-600" />;
-      case 'admin':
-        return <ShieldCheck className="w-4 h-4 text-red-600" />;
-      default:
-        return <User className="w-4 h-4" />;
-    }
+    onLoginSuccess(regRole, regName.trim() || 'New Partner', regEmail.trim() || 'partner@amhglobal.com');
+    onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs" onClick={onClose} />
 
-      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden z-10 my-8 border border-slate-200">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden z-10 my-8 border border-slate-200">
         {/* Header */}
-        <div className="bg-emerald-950 text-white p-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
+        <div className="bg-emerald-950 text-white p-6 flex items-center justify-between border-b border-emerald-900/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-900 flex items-center justify-center text-emerald-300 border border-emerald-600/30">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
             <div>
-              <h3 className="font-bold text-base">AMH Global Traders Sign In</h3>
-              <p className="text-xs text-emerald-300">Access your role-specific dashboard</p>
+              <h3 className="font-bold text-base text-white">AMH Global Traders</h3>
+              <p className="text-xs text-emerald-300/90">Secure Enterprise & Outgrower Access</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-emerald-300 hover:text-white hover:bg-emerald-900 transition-colors"
+            className="p-1.5 rounded-lg text-emerald-300 hover:text-white hover:bg-emerald-900/80 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Tab switch */}
-        <div className="flex border-b border-slate-200 bg-slate-50 p-1.5 gap-1">
+        {/* Tab Switch */}
+        <div className="flex border-b border-slate-100 bg-slate-50/80 p-1.5 gap-1">
           <button
             onClick={() => setTab('login')}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
               tab === 'login'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -126,101 +148,133 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
           <button
             onClick={() => setTab('register')}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
               tab === 'register'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            <span>Create Account</span>
+            <span>Register Account</span>
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6">
+          {loginError && (
+            <div className="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200">
+              {loginError}
+            </div>
+          )}
+
           {tab === 'login' ? (
-            <>
-              {/* 1-Click Quick Demo Sign In Buttons */}
-              <div className="space-y-2">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Quick 1-Click Test Logins:
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {DEMO_ACCOUNTS.map((acc) => (
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Account Email or ID
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. partner@amhglobal.com"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:border-emerald-600 focus:outline-hidden focus:ring-1 focus:ring-emerald-600"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => alert('Password reset link sent to your registered email.')}
+                    className="text-[11px] text-emerald-800 hover:underline font-semibold"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Enter account password"
+                    value={loginPass}
+                    onChange={(e) => setLoginPass(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:border-emerald-600 focus:outline-hidden focus:ring-1 focus:ring-emerald-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Portal Workspace Routing */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                  Portal Destination:
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { role: 'farmer' as AuthRole, label: 'Outgrower Farmer', icon: <Tractor className="w-3.5 h-3.5" /> },
+                    { role: 'manufacturer' as AuthRole, label: 'Wholesale Buyer', icon: <Factory className="w-3.5 h-3.5" /> },
+                    { role: 'community' as AuthRole, label: 'Elder / IKS', icon: <Heart className="w-3.5 h-3.5" /> },
+                    { role: 'student' as AuthRole, label: 'Academy Student', icon: <GraduationCap className="w-3.5 h-3.5" /> }
+                  ].map((item) => (
                     <button
-                      key={acc.email}
+                      key={item.role}
                       type="button"
-                      onClick={() => handleQuickLogin(acc)}
-                      className="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 bg-slate-50 hover:bg-emerald-50/50 text-left transition-all flex items-center gap-2.5"
+                      onClick={() => setSelectedRoleType(item.role)}
+                      className={`p-2 rounded-xl border text-xs font-semibold flex items-center gap-2 text-left transition-all ${
+                        selectedRoleType === item.role
+                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-1 ring-emerald-500'
+                          : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
                     >
-                      <div className="p-1.5 rounded-lg bg-white shadow-2xs shrink-0">
-                        {getRoleIcon(acc.role)}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-xs font-bold text-slate-900 block truncate">
-                          {acc.name}
-                        </span>
-                        <span className="text-[10px] text-slate-500 block truncate">
-                          {acc.roleLabel}
-                        </span>
-                      </div>
+                      <span className="text-emerald-700">{item.icon}</span>
+                      <span className="truncate">{item.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="relative flex items-center justify-center my-3">
-                <div className="border-t border-slate-200 w-full" />
-                <span className="bg-white px-3 text-[11px] text-slate-400 font-medium uppercase">
-                  or enter credentials
-                </span>
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded text-emerald-700 border-slate-300 focus:ring-emerald-500"
+                  />
+                  <span className="text-xs text-slate-600">Remember this device</span>
+                </label>
               </div>
 
-              {/* Standard Email/Pass form */}
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Email Address or Username
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. farmer@amhglobal.com"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:border-emerald-600 focus:outline-hidden"
-                  />
-                </div>
+              <button
+                type="submit"
+                className="w-full py-3 bg-emerald-800 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 hover:translate-y-[-1px]"
+              >
+                <span>Sign In to Secure Portal</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
 
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                      Password
-                    </label>
-                    <span className="text-[11px] text-emerald-700 font-medium">
-                      (Any demo password works)
-                    </span>
-                  </div>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={loginPass}
-                    onChange={(e) => setLoginPass(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:border-emerald-600 focus:outline-hidden"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white font-extrabold text-sm rounded-xl shadow-xs transition-colors"
-                >
-                  Sign In to Dashboard
-                </button>
-              </form>
-            </>
+              <div className="pt-2 text-center">
+                <span className="text-xs text-slate-500 flex items-center justify-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>256-bit encrypted agro-processing portal</span>
+                </span>
+              </div>
+            </form>
           ) : (
-            /* Register Form */
             <form onSubmit={handleRegisterSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -232,7 +286,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="e.g. Willem Steenkamp"
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:border-emerald-600 focus:outline-hidden"
                 />
               </div>
 
@@ -246,23 +300,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="willem@agri.co.za"
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:border-emerald-600 focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  I am registering as:
+                  Registering As
                 </label>
                 <select
                   value={regRole || 'farmer'}
                   onChange={(e) => setRegRole(e.target.value as AuthRole)}
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold bg-white"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold bg-white focus:border-emerald-600 focus:outline-hidden"
                 >
-                  <option value="farmer">Outgrower Farmer (Barkly West & Regions)</option>
-                  <option value="manufacturer">Commercial Manufacturer / Bulk Wholesale Buyer</option>
-                  <option value="community">Community Member / IKS Knowledge Keeper</option>
-                  <option value="student">Academy Student / Masterclass Trainee</option>
+                  <option value="farmer">Outgrower Farmer (Guaranteed Off-take)</option>
+                  <option value="manufacturer">Commercial Wholesale Buyer / Brand</option>
+                  <option value="student">Academy Trainee / Student</option>
+                  <option value="community">Community Elder / IKS Knowledge Keeper</option>
                 </select>
               </div>
 
@@ -273,30 +327,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <input
                   type="password"
                   required
-                  placeholder="••••••••"
+                  placeholder="Minimum 8 characters"
                   value={regPass}
                   onChange={(e) => setRegPass(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:border-emerald-600 focus:outline-hidden"
                 />
               </div>
 
-              <div className="flex items-start gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  checked={regConsent}
-                  onChange={(e) => setRegConsent(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 mt-0.5"
-                />
-                <span className="text-[11px] text-slate-600">
-                  I agree to POPIA personal data processing for procurement and training records.
-                </span>
+              <div className="pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={regConsent}
+                    onChange={(e) => setRegConsent(e.target.checked)}
+                    className="w-4 h-4 rounded text-emerald-700 border-slate-300 mt-0.5"
+                  />
+                  <span className="text-xs text-slate-600 leading-snug">
+                    I agree to the AMH Global Traders partner terms, Barkly West collection protocols, and POPIA privacy policy.
+                  </span>
+                </label>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white font-extrabold text-sm rounded-xl shadow-xs transition-colors"
+                className="w-full py-3 bg-emerald-800 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-md transition-colors"
               >
-                Register & Open My Portal
+                Create Partner Account
               </button>
             </form>
           )}

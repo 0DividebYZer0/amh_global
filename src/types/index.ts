@@ -1,5 +1,16 @@
 export type ProductCategory = 'All' | 'Seeds' | 'Value-Added' | 'By-Products' | 'Digital' | 'Bulk';
 
+export type CurrencyCode = 'ZAR' | 'GHS' | 'USD';
+
+export interface CurrencyConfig {
+  code: CurrencyCode;
+  symbol: string;
+  name: string;
+  flag: string;
+  region: string;
+  rateAgainstZar: number;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -99,12 +110,15 @@ export interface Order {
   phone?: string;
   vatNumber?: string;
   address?: string;
-  payMethod: 'PayFast' | 'EFT';
-  status: 'Pending EFT' | 'Paid' | 'Processing' | 'Shipped';
+  payMethod: 'PayFast' | 'EFT' | 'MobileMoney' | 'InternationalCard';
+  status: 'Pending EFT' | 'Pending Clearance' | 'Paid' | 'Processing' | 'Shipped';
   items: CartItem[];
   subtotal: number;
   vat: number;
   total: number;
+  currency?: CurrencyCode;
+  currencyTotal?: number;
+  exchangeRate?: number;
   ref?: string | null;
   affiliateRef?: string;
 }
@@ -134,9 +148,57 @@ export interface ScheduledEvent {
   durationMinutes: number;
   seats: number;
   room: string;
-  platform: 'Jitsi' | 'In-person' | 'Other';
+  platform: 'Jitsi' | 'In-person' | 'Hybrid' | 'Other';
   desc: string;
   published: boolean;
+  category?: 'Live Training' | 'Bootcamp' | 'Industry Summit' | 'Summit';
+  location?: string;
+  ticketTiers?: { name: string; price: number; description: string; availableSeats: number }[];
+}
+
+export interface EventTicket {
+  ticketId: string;
+  eventId: string;
+  eventTitle: string;
+  date: string;
+  time: string;
+  platformOrLocation: string;
+  tier: string;
+  price: number;
+  attendeeName: string;
+  attendeeEmail: string;
+  organization?: string;
+  phone?: string;
+  issuedAt: string;
+  status: 'Confirmed' | 'Checked-in' | 'Cancelled';
+}
+
+export interface AffiliatePartner {
+  id: string;
+  name: string;
+  email: string;
+  entityName: string;
+  partnerName?: string;
+  contactPerson?: string;
+  phone?: string;
+  region?: string;
+  referralCode: string;
+  tier: 'Tier 1: Promoter' | 'Tier 2: Silver Reseller' | 'Tier 3: Gold Distributor' | 'Tier 1 Reseller' | 'Tier 2 Master Partner';
+  commissionRatePct: number;
+  commissionRate?: number;
+  parentAffiliateId?: string;
+  totalClicks: number;
+  conversions: number;
+  totalSalesValueR: number;
+  totalSalesZar?: number;
+  earnedCommissionR: number;
+  commissionEarnedZar?: number;
+  tier2OverrideCommissionR: number;
+  activeSubAffiliates?: number;
+  availableBalanceR: number;
+  payoutMethod: string;
+  bankDetails?: string;
+  status: 'Active' | 'Pending Review';
 }
 
 export interface ContributorApp {

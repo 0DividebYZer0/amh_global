@@ -20,6 +20,7 @@ import {
   Info
 } from 'lucide-react';
 import { HarvestYield } from '../types';
+import { usePlainLanguage } from '../context/PlainLanguageContext';
 
 interface FarmerPortalProps {
   farmerName: string;
@@ -36,6 +37,8 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
   onSubmitYield,
   onShowToast
 }) => {
+  const { isPlainLanguage, simplify } = usePlainLanguage();
+
   // Simple form state with large controls
   const [selectedCrop, setSelectedCrop] = useState('PKM-1 Clean Seed');
   const [kgAmount, setKgAmount] = useState<number>(100);
@@ -46,10 +49,34 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
 
   // Guaranteed off-take price rates
   const guaranteedPrices: Record<string, { pricePerKg: number; unit: string; qualityReq: string }> = {
-    'PKM-1 Clean Seed': { pricePerKg: 45.0, unit: 'R45.00 / kg', qualityReq: 'Moisture < 7.0%, de-winged' },
-    'Whole Shadow-Dried Leaf': { pricePerKg: 28.0, unit: 'R28.00 / kg', qualityReq: 'Bright green, shade-dried' },
-    'Dried Leaf Chaff (Feed)': { pricePerKg: 18.5, unit: 'R18.50 / kg', qualityReq: 'Stem-free, clean bags' },
-    'Moringa Seed Pods': { pricePerKg: 32.0, unit: 'R32.00 / kg', qualityReq: 'Mature brown pods' }
+    'PKM-1 Clean Seed': {
+      pricePerKg: 45.0,
+      unit: 'R45.00 / kg',
+      qualityReq: isPlainLanguage
+        ? 'Well-dried (<7% water), wing skins removed'
+        : 'Moisture < 7.0%, de-winged'
+    },
+    'Whole Shadow-Dried Leaf': {
+      pricePerKg: 28.0,
+      unit: 'R28.00 / kg',
+      qualityReq: isPlainLanguage
+        ? 'Bright green leaves, dried in shade'
+        : 'Bright green, shade-dried'
+    },
+    'Dried Leaf Chaff (Feed)': {
+      pricePerKg: 18.5,
+      unit: 'R18.50 / kg',
+      qualityReq: isPlainLanguage
+        ? 'Clean leaf feed for goats and cattle'
+        : 'Stem-free, clean bags'
+    },
+    'Moringa Seed Pods': {
+      pricePerKg: 32.0,
+      unit: 'R32.00 / kg',
+      qualityReq: isPlainLanguage
+        ? 'Ripe, dry brown hanging pods'
+        : 'Mature brown pods'
+    }
   };
 
   const currentRate = guaranteedPrices[selectedCrop]?.pricePerKg || 45;
@@ -66,9 +93,14 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
       setIsSpeaking(false);
       return;
     }
-    const text = `Welcome ${farmerName}. This is your AMH Global Traders Farmer Portal. The current guaranteed price for ${selectedCrop} is ${currentRate} Rands per kilogram. For your ${kgAmount} kilograms, estimated payout is ${estimatedPayout} Rands. Click the green button below to schedule collection truck pickup. If you need assistance, tap the WhatsApp button to speak with our Barkly West agronomist.`;
+    const cropName = isPlainLanguage && selectedCrop.includes('Chaff')
+      ? 'Animal Feed Leaves'
+      : selectedCrop;
+    const text = isPlainLanguage
+      ? `Hello ${farmerName}. This is your AMH farmer page. We guarantee to buy your ${cropName} for ${currentRate} Rands per kilogram. For your ${kgAmount} kilograms, you will receive ${estimatedPayout} Rands paid straight into your bank account. Press the green button below to call our truck to your farm gate. If you have any question, tap the call agronomist button.`
+      : `Welcome ${farmerName}. This is your AMH Global Traders Farmer Portal. The current guaranteed price for ${selectedCrop} is ${currentRate} Rands per kilogram. For your ${kgAmount} kilograms, estimated payout is ${estimatedPayout} Rands. Click the green button below to schedule collection truck pickup. If you need assistance, tap the WhatsApp button to speak with our Barkly West agronomist.`;
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9; // slightly slower for clarity
+    utterance.rate = 0.88; // slightly slower for clarity
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
     setIsSpeaking(true);
@@ -111,7 +143,7 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="bg-emerald-700/80 text-emerald-200 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-500/40">
-                  Certified Outgrower Partner
+                  {simplify('Certified Outgrower Partner', 'Certified Partner Farmer')}
                 </span>
                 <span className="text-xs text-emerald-200 flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" /> Barkly West & Vaal River District
@@ -121,7 +153,7 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
                 Welcome, {farmerName}
               </h1>
               <p className="text-emerald-100 text-sm sm:text-base max-w-xl font-medium">
-                Farm: <strong className="text-white">{farmName}</strong>. You have guaranteed off-take contracts with AMH Global Traders. Every bag of clean seed and leaf is weighed, tested, and paid directly to your bank account.
+                Farm: <strong className="text-white">{farmName}</strong>. {simplify('You have guaranteed off-take contracts with AMH Global Traders. Every bag of clean seed and leaf is weighed, tested, and paid directly to your bank account.', 'AMH Global Traders guarantees to buy all your harvested moringa. Every bag of clean seed and leaf is weighed and paid directly to your bank account within 24 hours.')}
               </p>
             </div>
 
@@ -154,11 +186,11 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
             <div className="flex items-center gap-2">
               <DollarSign className="w-6 h-6 text-emerald-600" />
               <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                Today's Guaranteed Purchase Prices (Direct Bank Payout)
+                {simplify("Today's Guaranteed Purchase Prices (Direct Bank Payout)", "Today's Guaranteed Cash Prices (Money Directly to Bank)")}
               </h2>
             </div>
             <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-              Verified by AMH Procurement
+              {simplify('Verified by AMH Procurement', 'Guaranteed by AMH Buying Team')}
             </span>
           </div>
 
@@ -197,10 +229,13 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                  Step 1: Book Collection Truck for Your Harvest
+                  {simplify('Step 1: Book Collection Truck for Your Harvest', 'Step 1: Call AMH Truck to Collect Your Bags')}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600">
-                  Our AMH truck visits Barkly West and surrounding farms every Tuesday and Friday.
+                  {simplify(
+                    'Our AMH truck visits Barkly West and surrounding farms every Tuesday and Friday.',
+                    'Our truck comes right to your farm gate every Tuesday and Friday to weigh and collect.'
+                  )}
                 </p>
               </div>
             </div>
@@ -355,24 +390,36 @@ export const FarmerPortal: React.FC<FarmerPortalProps> = ({
               {/* Simple 4-Step Process Guide for non-technical farmers */}
               <div className="pt-3 border-t border-slate-100">
                 <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-3">
-                  How AMH Buys Your Moringa (Simple 4 Steps):
+                  {simplify('How AMH Buys Your Moringa (Simple 4 Steps):', 'How AMH Buys and Pays for Your Moringa (4 Easy Steps):')}
                 </span>
                 <div className="space-y-2.5 text-xs text-slate-700">
                   <div className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center justify-center shrink-0">1</span>
-                    <span><strong>You book a pickup:</strong> We schedule our truck to your farm gate.</span>
+                    <span>
+                      <strong>{simplify('You book a pickup:', 'You request a truck:')}</strong>{' '}
+                      {simplify('We schedule our truck to your farm gate.', 'We send our truck straight to your farm gate.')}
+                    </span>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center justify-center shrink-0">2</span>
-                    <span><strong>Driver weighs & tests moisture:</strong> Handheld meter confirms moisture is below 7%.</span>
+                    <span>
+                      <strong>{simplify('Driver weighs & tests moisture:', 'Driver weighs your bags & checks dryness:')}</strong>{' '}
+                      {simplify('Handheld meter confirms moisture is below 7%.', 'We confirm seeds are nicely dried (<7% water) so they do not rot.')}
+                    </span>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center justify-center shrink-0">3</span>
-                    <span><strong>Official Delivery Slip issued:</strong> Signed copy handed to you.</span>
+                    <span>
+                      <strong>{simplify('Official Delivery Slip issued:', 'Paper Receipt handed to you:')}</strong>{' '}
+                      {simplify('Signed copy handed to you.', 'Driver signs and gives you a printed receipt with exact kilogram weight.')}
+                    </span>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center justify-center shrink-0">4</span>
-                    <span><strong>Direct Bank EFT:</strong> Money deposited within 24 business hours.</span>
+                    <span>
+                      <strong>{simplify('Direct Bank EFT:', 'Cash Paid to Bank:')}</strong>{' '}
+                      {simplify('Money deposited within 24 business hours.', 'Your money is deposited straight into your bank account within 24 hours.')}
+                    </span>
                   </div>
                 </div>
               </div>

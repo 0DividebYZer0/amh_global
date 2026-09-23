@@ -25,7 +25,7 @@ export const SupplierApplyModal: React.FC<SupplierApplyModalProps> = ({
   const [representative, setRepresentative] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [province, setProvince] = useState('Northern Cape');
+  const [province, setProvince] = useState('Ghana - Greater Accra & Moringa City Hub');
   const [hectares, setHectares] = useState(5);
   const [crop, setCrop] = useState('PKM-1 Certified Seed & Leaf Biomass');
   const [capacityNotes, setCapacityNotes] = useState('');
@@ -58,8 +58,8 @@ export const SupplierApplyModal: React.FC<SupplierApplyModalProps> = ({
           <div className="flex items-center gap-2.5">
             <Sprout className="w-5 h-5 text-emerald-400" />
             <div>
-              <h3 className="font-bold text-base">Become an AMH Outgrower Supplier</h3>
-              <p className="text-[11px] text-emerald-200">Guaranteed Off-Take Purchase Agreement KYC</p>
+              <h3 className="font-bold text-base">Pan-African Outgrower Application</h3>
+              <p className="text-[11px] text-emerald-200">Guaranteed Off-Take Agreement · Ghana, South Africa &amp; 44 Nations</p>
             </div>
           </div>
           <button
@@ -133,21 +133,31 @@ export const SupplierApplyModal: React.FC<SupplierApplyModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Province / Region</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Country / Outgrower Region *</label>
               <select
                 value={province}
                 onChange={(e) => setProvince(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
               >
-                <option>Northern Cape</option>
-                <option>Western Cape</option>
-                <option>Gauteng</option>
-                <option>Limpopo</option>
-                <option>Mpumalanga</option>
-                <option>KwaZulu-Natal</option>
-                <option>Free State</option>
-                <option>North West</option>
-                <option>Eastern Cape</option>
+                <optgroup label="Ghana Operations (West Africa)">
+                  <option>Ghana - Greater Accra &amp; Moringa City Hub</option>
+                  <option>Ghana - Volta Region Basin</option>
+                  <option>Ghana - Eastern &amp; Ashanti Outgrowers</option>
+                  <option>Ghana - Northern &amp; Savannah Belt</option>
+                </optgroup>
+                <optgroup label="South Africa Operations (HQ)">
+                  <option>South Africa - Northern Cape (Barkly West Hub)</option>
+                  <option>South Africa - Limpopo &amp; Mpumalanga</option>
+                  <option>South Africa - Gauteng &amp; North West</option>
+                  <option>South Africa - KwaZulu-Natal</option>
+                  <option>South Africa - Western &amp; Eastern Cape</option>
+                </optgroup>
+                <optgroup label="Pan-African Member Hubs">
+                  <option>Nigeria - Lagos / Ogun / Oyo Outgrowers</option>
+                  <option>Kenya - Rift Valley &amp; Eastern Outgrowers</option>
+                  <option>Tanzania / Uganda East African Outgrowers</option>
+                  <option>Other African State (44 Nations Network)</option>
+                </optgroup>
               </select>
             </div>
             <div>

@@ -25,11 +25,11 @@ export const Footer: React.FC<FooterProps> = ({
               <span className="text-base font-bold text-white">AMH Global Traders</span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed">
-              African Moringa Hub Global Traders (Pty) Ltd. Commercial agro-processing, certified seed cultivars, accredited masterclasses, and indigenous stewardship.
+              Commercial trading & agro-processing arm of the Africa Moringa Hub (AMH). Uniting 44 African nations with dual operational processing hubs in Ghana and South Africa under AfCFTA protocols.
             </p>
             <div className="text-[11px] text-slate-500 space-y-0.5">
-              <div>Reg: 2024/782910/07 · VAT: ZA4910284729</div>
-              <div>Barkly West Agro-Processing Facility, Northern Cape</div>
+              <div>HQ: South Africa &middot; Hub: Ghana &middot; 44 African Nations Network</div>
+              <div>Barkly West Agro-Processing Plant &amp; Accra Centralized Processing Center</div>
             </div>
           </div>
 
@@ -46,12 +46,17 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button onClick={() => onNavigate('store')} className="hover:text-emerald-400 transition-colors">
-                  Virgin Cold-Pressed Oil (50ml / 1L)
+                  Virgin Cold-Pressed Oil (50ml - 1L)
                 </button>
               </li>
               <li>
                 <button onClick={() => onNavigate('store')} className="hover:text-emerald-400 transition-colors">
-                  25L Commercial Wholesale Drums
+                  25L Drums & 1,000L IBC Wholesale Totes
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigate('store')} className="hover:text-emerald-400 transition-colors">
+                  100kg Palletized Bulk Sacks & Powder
                 </button>
               </li>
               <li>
@@ -75,12 +80,17 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button onClick={() => onNavigate('academy')} className="hover:text-emerald-400 transition-colors">
-                  Live Jitsi Broadcast Classroom
+                  Africa Moringa Wealth Summit 2026
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigate('academy')} className="hover:text-emerald-400 transition-colors">
+                  Pan-African Live Broadcast Classroom
                 </button>
               </li>
               <li>
                 <button onClick={onOpenIks} className="hover:text-emerald-400 transition-colors">
-                  Indigenous Knowledge Systems (IKS) Hub
+                  Indigenous Knowledge (IKS) & Nebedaye Lore
                 </button>
               </li>
               <li>
@@ -94,33 +104,51 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Contact Coordinates */}
           <div className="space-y-2.5">
             <span className="font-bold text-white text-xs uppercase tracking-wider block">
-              Commercial Desk
+              Dual Pan-African Hubs
             </span>
-            <div className="space-y-2 text-slate-400">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Plot 14, Vaaloewer Agricultural Estate, Barkly West, 8375</span>
+            <div className="space-y-2.5 text-slate-400 text-[11px]">
+              <div>
+                <strong className="text-white block text-xs">Southern Africa Operations (HQ):</strong>
+                <div className="flex items-start gap-1.5 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                  <span>Plot 14, Vaaloewer Agricultural Estate, Barkly West, 8375, South Africa</span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>+27 (0) 53 831 2000</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>accounts@amhglobal.com</span>
+
+              <div className="pt-1 border-t border-slate-900">
+                <strong className="text-white block text-xs">West Africa Hub (Ghana):</strong>
+                <div className="flex items-start gap-1.5 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                  <span>Centralized Processing Center & Moringa City, Accra, Ghana</span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>+233 24 456 7890</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>+27 (0) 53 831 2000</span>
+
+              <div className="pt-1 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="text-emerald-400">trade@africamoringahub.org</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="pt-8 mt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500">
-          <p>© 2026 African Moringa Hub Global (Pty) Ltd. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>POPIA Compliant</span>
+          <p>© 2026 Africa Moringa Hub (AMH) Global Traders. Pan-African Operations across 44 Nations.</p>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span>AfCFTA Trade Protocol</span>
+            <span>·</span>
+            <span>ECOWAS & SADC Corridors</span>
             <span>·</span>
             <span>HACCP & GMP Principles</span>
             <span>·</span>
-            <span>PayFast Certified</span>
+            <span>MDASA Member</span>
           </div>
         </div>
       </div>

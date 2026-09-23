@@ -8,13 +8,16 @@ import {
   ContributorApp,
   IksArticle,
   UserProgress,
-  AuthRole
+  AuthRole,
+  EventTicket,
+  AffiliatePartner
 } from '../types';
 import {
   DEFAULT_USER_PROGRESS,
   SEED_SUPPLIERS,
   SEED_EVENTS,
-  SEED_ARTICLES
+  SEED_ARTICLES,
+  SEED_AFFILIATE_PARTNERS
 } from '../data/seedData';
 
 // Generic localStorage helper
@@ -233,4 +236,38 @@ export const loadAuth = (): { role: AuthRole; name: string; email: string } => {
 
 export const saveAuth = (auth: { role: AuthRole; name: string; email: string }): void => {
   storage.set('amh_auth_session', auth);
+};
+
+// Event Tickets
+export const loadTickets = (): EventTicket[] => {
+  return storage.get<EventTicket[]>('amh_event_tickets', [
+    {
+      ticketId: 'AMH-TKT-2026-8819',
+      eventId: 'evt-1',
+      eventTitle: 'Live Commercial Cold-Pressing Calibration Masterclass',
+      date: '2026-09-28',
+      time: '14:00 SAST',
+      platformOrLocation: 'Virtual Broadcast · Barkly West Agro-Processing Facility',
+      tier: 'Virtual Pass',
+      price: 0,
+      attendeeName: 'Thabo Mokoena',
+      attendeeEmail: 'thabo@gmail.com',
+      organization: 'Mokoena Agro Projects',
+      issuedAt: '2026-09-22',
+      status: 'Confirmed'
+    }
+  ]);
+};
+
+export const saveTickets = (tickets: EventTicket[]): void => {
+  storage.set('amh_event_tickets', tickets);
+};
+
+// Affiliate Marketing Partners
+export const loadAffiliatePartners = (defaults: AffiliatePartner[] = SEED_AFFILIATE_PARTNERS): AffiliatePartner[] => {
+  return storage.get<AffiliatePartner[]>('amh_affiliates_v2', defaults);
+};
+
+export const saveAffiliatePartners = (partners: AffiliatePartner[]): void => {
+  storage.set('amh_affiliates_v2', partners);
 };

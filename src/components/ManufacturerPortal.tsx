@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { SEED_BATCH_COAS } from '../data/seedData';
 import { Order, RfqRecord } from '../types';
+import { usePlainLanguage } from '../context/PlainLanguageContext';
 
 interface ManufacturerPortalProps {
   companyName: string;
@@ -43,6 +44,7 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
   onViewInvoice,
   onShowToast
 }) => {
+  const { isPlainLanguage, simplify } = usePlainLanguage();
   const [selectedCoa, setSelectedCoa] = useState(SEED_BATCH_COAS[0]);
 
   // Demo active freight shipments
@@ -50,7 +52,9 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
     {
       id: 'WAY-94821',
       carrier: 'The Courier Guy (Heavy Freight)',
-      item: '4 × 25L Food-Grade HDPE Drums (Virgin Cold-Pressed Oil)',
+      item: isPlainLanguage
+        ? '4 × 25L Sealed Blue Food Drums (Pure Cold-Squeezed Virgin Oil)'
+        : '4 × 25L Food-Grade HDPE Drums (Virgin Cold-Pressed Oil)',
       lotNumber: 'AMH-OIL-2026-B4',
       origin: 'AMH Processing Facility, Barkly West (NC)',
       destination: 'Stellenbosch Techno Park, Western Cape',
@@ -71,7 +75,7 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-500/30">
-                  Wholesale & Manufacturer Portal
+                  {simplify('Wholesale & Manufacturer Portal', 'Wholesale & Factory Buyer Workspace')}
                 </span>
                 <span className="text-xs text-slate-300 flex items-center gap-1">
                   <Building2 className="w-3.5 h-3.5 text-emerald-400" /> Commercial Account
@@ -81,7 +85,11 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
                 {companyName}
               </h1>
               <p className="text-slate-300 text-sm max-w-xl">
-                Primary Contact: <strong className="text-white">{contactName}</strong> ({email}). Access batch lab test certificates (COA), track bulk 25L drums in transit, and manage commercial freight quotations.
+                Primary Contact: <strong className="text-white">{contactName}</strong> ({email}).{' '}
+                {simplify(
+                  'Access batch lab test certificates (COA), track bulk 25L drums in transit, and manage commercial freight quotations.',
+                  'Access laboratory quality test certificates, track your 25-litre sealed drums on the delivery truck, and request bulk price quotes.'
+                )}
               </p>
             </div>
 
@@ -91,7 +99,7 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
                 className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-2xl text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-transform hover:scale-102"
               >
                 <Layers className="w-4 h-4" />
-                <span>Request Bulk RFQ Quotation</span>
+                <span>{simplify('Request Bulk RFQ Quotation', 'Request Price & Delivery Quote')}</span>
               </button>
             </div>
           </div>
@@ -104,13 +112,15 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
               <Truck className="w-6 h-6 text-emerald-700" />
               <div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                  Commercial Freight & Drum Logistics Tracker
+                  {simplify('Commercial Freight & Drum Logistics Tracker', 'Bulk Drum Delivery Tracker')}
                 </h2>
-                <p className="text-xs text-slate-500">Live courier telemetry from Barkly West facility</p>
+                <p className="text-xs text-slate-500">
+                  {simplify('Live courier telemetry from Barkly West facility', 'Live delivery tracking from Barkly West pressing facility')}
+                </p>
               </div>
             </div>
             <span className="text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full animate-pulse">
-              1 Active Bulk Consignment
+              {simplify('1 Active Bulk Consignment', '1 Active Drum Delivery on the Way')}
             </span>
           </div>
 
@@ -193,10 +203,13 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">
-                    Batch Certificate of Analysis (COA) Repository
+                    {simplify('Batch Certificate of Analysis (COA) Repository', 'Official Laboratory Purity & Quality Test Certificates')}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Independent laboratory verification for cosmetic & pharmaceutical compliance
+                    {simplify(
+                      'Independent laboratory verification for cosmetic & pharmaceutical compliance',
+                      'Independent laboratory proof showing zero chemicals, low acidity, and highest purity'
+                    )}
                   </p>
                 </div>
               </div>
@@ -254,16 +267,33 @@ export const ManufacturerPortal: React.FC<ManufacturerPortalProps> = ({
 
               {/* Lab Parameters Table */}
               <div className="grid grid-cols-2 gap-3 pt-1">
-                {Object.entries(selectedCoa.params).map(([key, val]) => (
-                  <div key={key} className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                    <span className="text-slate-400 text-[10px] uppercase block tracking-wider">
-                      {key.replace(/([A-Z])/g, ' $1')}
-                    </span>
-                    <span className="text-white font-bold text-xs sm:text-sm mt-0.5 block">
-                      {val}
-                    </span>
-                  </div>
-                ))}
+                {Object.entries(selectedCoa.params).map(([key, val]) => {
+                  const plainNames: Record<string, string> = {
+                    germinationRate: 'Sprouting Rate (Germination)',
+                    purity: 'Seed Cleanliness & Purity',
+                    moistureContent: 'Moisture (Seed Dryness)',
+                    freeFattyAcids: 'Freshness (Free Fatty Acids)',
+                    peroxideValue: 'Freshness Level (Not Rancid)',
+                    acidValue: 'Acidity Level',
+                    smokePoint: 'Heat Tolerance (Smoke Point)',
+                    coldPressedTemp: 'Cold-Press Temperature (Below 40°C)'
+                  };
+
+                  const displayName = isPlainLanguage && plainNames[key]
+                    ? plainNames[key]
+                    : key.replace(/([A-Z])/g, ' $1');
+
+                  return (
+                    <div key={key} className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <span className="text-slate-400 text-[10px] uppercase block tracking-wider">
+                        {displayName}
+                      </span>
+                      <span className="text-white font-bold text-xs sm:text-sm mt-0.5 block">
+                        {val}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">

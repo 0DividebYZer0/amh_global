@@ -10,14 +10,19 @@ import {
   ContributorApp,
   IksArticle,
   UserProgress,
-  AuthRole
+  AuthRole,
+  EventTicket,
+  AffiliatePartner,
+  CurrencyCode
 } from './types';
+import { CurrencyProvider } from './context/CurrencyContext';
 import {
   SEED_PRODUCTS,
   SEED_MODULES,
   SEED_EVENTS,
   SEED_ARTICLES,
-  SEED_SUPPLIERS
+  SEED_SUPPLIERS,
+  SEED_AFFILIATE_PARTNERS
 } from './data/seedData';
 import {
   loadCart,
@@ -39,7 +44,11 @@ import {
   loadProgress,
   saveProgress,
   loadAuth,
-  saveAuth
+  saveAuth,
+  loadTickets,
+  saveTickets,
+  loadAffiliatePartners,
+  saveAffiliatePartners
 } from './utils/storage';
 
 // Modular UI Components
@@ -68,10 +77,12 @@ import { CertificateModal } from './components/CertificateModal';
 import { AuthModal } from './components/AuthModal';
 import { LmsPlayer } from './components/LmsPlayer';
 import { LiveClassroomModal } from './components/LiveClassroomModal';
+import { EventTicketingModal } from './components/EventTicketingModal';
 import { Toast } from './components/Toast';
 import { Footer } from './components/Footer';
+import { PlainLanguageProvider } from './context/PlainLanguageContext';
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
   // Navigation & View Tab
   const [currentTab, setCurrentTab] = useState<string>('home');
 
@@ -87,6 +98,8 @@ export const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>(SEED_PRODUCTS);
   const [progress, setProgress] = useState<UserProgress>(() => loadProgress());
   const [auth, setAuth] = useState<{ role: AuthRole; name: string; email: string }>(() => loadAuth());
+  const [tickets, setTickets] = useState<EventTicket[]>(() => loadTickets());
+  const [affiliatePartners, setAffiliatePartners] = useState<AffiliatePartner[]>(() => loadAffiliatePartners());
 
   // Modal Visibility States
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -101,12 +114,14 @@ export const App: React.FC = () => {
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isLmsPlayerOpen, setIsLmsPlayerOpen] = useState(false);
   const [isLiveClassOpen, setIsLiveClassOpen] = useState(false);
+  const [isEventTicketingOpen, setIsEventTicketingOpen] = useState(false);
 
   // Selected Entities for Modals
   const [selectedRfqProduct, setSelectedRfqProduct] = useState<Product | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<IksArticle | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedLiveEvent, setSelectedLiveEvent] = useState<ScheduledEvent | null>(null);
+  const [selectedEventForBooking, setSelectedEventForBooking] = useState<ScheduledEvent | null>(null);
 
   // Global Toast Notifications
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -193,7 +208,11 @@ export const App: React.FC = () => {
     phone: string;
     vatNumber: string;
     address: string;
-    payMethod: 'PayFast' | 'EFT';
+    country: string;
+    payMethod: 'PayFast' | 'EFT' | 'MobileMoney' | 'InternationalCard';
+    currency: CurrencyCode;
+    currencyTotal: number;
+    exchangeRate: number;
   }) => {
     setIsCheckoutOpen(false);
 
@@ -207,6 +226,10 @@ export const App: React.FC = () => {
       year: 'numeric'
     });
 
+    const formattedAddress = orderDetails.address
+      ? `${orderDetails.address}, ${orderDetails.country}`
+      : orderDetails.country;
+
     const newOrder: Order = {
       id: `ord-${Date.now()}`,
       invNumber: invNum,
@@ -215,26 +238,29 @@ export const App: React.FC = () => {
       email: orderDetails.email,
       phone: orderDetails.phone,
       vatNumber: orderDetails.vatNumber,
-      address: orderDetails.address,
+      address: formattedAddress,
       items: [...cart],
       subtotal,
       vat,
       total,
+      currency: orderDetails.currency,
+      currencyTotal: orderDetails.currencyTotal,
+      exchangeRate: orderDetails.exchangeRate,
       payMethod: orderDetails.payMethod,
-      status: orderDetails.payMethod === 'PayFast' ? 'Pending EFT' : 'Pending EFT'
+      status: orderDetails.payMethod === 'EFT' ? 'Pending EFT' : 'Pending Clearance'
     };
 
     setSelectedOrder(newOrder);
 
-    if (orderDetails.payMethod === 'PayFast') {
-      setIsPayFastOpen(true);
-    } else {
+    if (orderDetails.payMethod === 'EFT') {
       const updatedOrders = [newOrder, ...orders];
       setOrders(updatedOrders);
       saveOrders(updatedOrders);
       handleClearCart();
       setIsInvoiceOpen(true);
-      showToast(`Pro-Forma Invoice ${invNum} generated.`);
+      showToast(`Pro-Forma Invoice ${invNum} generated in ${orderDetails.currency}.`);
+    } else {
+      setIsPayFastOpen(true);
     }
   };
 
@@ -248,10 +274,14 @@ export const App: React.FC = () => {
     setOrders(updatedOrders);
     saveOrders(updatedOrders);
     setSelectedOrder(paidOrder);
-    handleClearCart();
     setIsPayFastOpen(false);
+    handleClearCart();
     setIsInvoiceOpen(true);
-    showToast(`Payment of R ${paidOrder.total.toFixed(2)} received via PayFast.`);
+    const curr = paidOrder.currency || 'ZAR';
+    const dispTotal = paidOrder.currencyTotal
+      ? paidOrder.currencyTotal.toFixed(2)
+      : paidOrder.total.toFixed(2);
+    showToast(`Payment of ${curr} ${dispTotal} settled successfully! Official tax invoice generated.`);
   };
 
   // RFQ Submission
@@ -484,15 +514,6 @@ export const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-950 ${isLargeText ? 'text-base sm:text-lg leading-relaxed' : ''}`}>
-      {/* Top Testing Sub-bar with 1-Click Role Switcher & Credentials Modal */}
-      <RoleDemoBanner
-        currentRole={auth.role}
-        currentName={auth.name}
-        onSelectRole={handleSelectRole}
-        onToggleLargeText={() => setIsLargeText(!isLargeText)}
-        isLargeText={isLargeText}
-      />
-
       {/* Primary Global Navigation */}
       <Navbar
         currentTab={currentTab}
@@ -503,6 +524,8 @@ export const App: React.FC = () => {
         userName={auth.name}
         openAuth={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
+        onToggleLargeText={() => setIsLargeText(!isLargeText)}
+        isLargeText={isLargeText}
       />
 
       {/* Main Routed Stage */}
@@ -537,6 +560,10 @@ export const App: React.FC = () => {
               setIsLiveClassOpen(true);
             }}
             onOpenCertificate={() => setIsCertificateOpen(true)}
+            onBookEventTicket={(ev) => {
+              setSelectedEventForBooking(ev);
+              setIsEventTicketingOpen(true);
+            }}
           />
         )}
 
@@ -555,6 +582,14 @@ export const App: React.FC = () => {
           <AffiliatesSection
             onOpenSupplierModal={() => setIsSupplierApplyOpen(true)}
             onShowToast={showToast}
+            partners={affiliatePartners}
+            onRegisterPartner={(newPartner) => {
+              setAffiliatePartners((prev) => {
+                const updated = [newPartner, ...prev];
+                saveAffiliatePartners(updated);
+                return updated;
+              });
+            }}
           />
         )}
 
@@ -609,6 +644,7 @@ export const App: React.FC = () => {
             progress={progress}
             modules={SEED_MODULES}
             orders={orders}
+            tickets={tickets}
             userName={auth.name}
             userEmail={auth.email}
             onOpenPlayer={() => setIsLmsPlayerOpen(true)}
@@ -730,6 +766,25 @@ export const App: React.FC = () => {
         onConfirmAttendance={handleConfirmAttendance}
       />
 
+      <EventTicketingModal
+        isOpen={isEventTicketingOpen}
+        onClose={() => {
+          setIsEventTicketingOpen(false);
+          setSelectedEventForBooking(null);
+        }}
+        event={selectedEventForBooking}
+        userName={auth.name}
+        userEmail={auth.email}
+        onIssueTicket={(newTicket) => {
+          setTickets((prev) => {
+            const updated = [newTicket, ...prev];
+            saveTickets(updated);
+            return updated;
+          });
+        }}
+        onShowToast={showToast}
+      />
+
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
@@ -744,7 +799,28 @@ export const App: React.FC = () => {
         onOpenSupplier={() => setCurrentTab('ecosystem')}
         onOpenIks={() => setCurrentTab('iks')}
       />
+
+      {/* Perspective Switcher restricted strictly to authenticated Admin */}
+      {auth.role === 'admin' && (
+        <RoleDemoBanner
+          currentRole={auth.role}
+          currentName={auth.name}
+          onSelectRole={handleSelectRole}
+          onToggleLargeText={() => setIsLargeText(!isLargeText)}
+          isLargeText={isLargeText}
+        />
+      )}
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <PlainLanguageProvider>
+      <CurrencyProvider>
+        <AppContent />
+      </CurrencyProvider>
+    </PlainLanguageProvider>
   );
 };
 
