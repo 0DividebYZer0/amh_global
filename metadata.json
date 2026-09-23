@@ -1,0 +1,6 @@
+{
+  "name": "AMH Global - Africa's Moringa Agro-Processing & Academy",
+  "description": "Commercial Moringa agro-processing, certified PKM planting seeds, B2B cold-pressed virgin oil distribution, interactive H5P Academy LMS, and Indigenous Knowledge Systems hub.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
