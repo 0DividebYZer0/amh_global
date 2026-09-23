@@ -27,7 +27,7 @@ export const OutgrowerPortal: React.FC<OutgrowerPortalProps> = ({
     e.preventDefault();
     const q = Number(qty);
     if (isNaN(q) || q <= 0) {
-      alert('Please enter a valid harvest quantity in KG.');
+      onShowToast('Please enter a valid harvest quantity in KG.');
       return;
     }
 

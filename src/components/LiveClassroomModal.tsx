@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Video, Users, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Video, Users, MessageSquare, Send, CheckCircle2, CircleDot, Radio, HardDrive, Share2 } from 'lucide-react';
 import { ScheduledEvent } from '../types';
 
 interface LiveClassroomModalProps {
@@ -31,8 +31,37 @@ export const LiveClassroomModal: React.FC<LiveClassroomModalProps> = ({
   ]);
   const [chatInput, setChatInput] = useState('');
   const [attendanceLogged, setAttendanceLogged] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [recordingArchived, setRecordingArchived] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isRecording) {
+      timer = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isRecording]);
 
   if (!isOpen || !event) return null;
+
+  const handleToggleRecording = () => {
+    if (!isRecording) {
+      setIsRecording(true);
+      setRecordingArchived(false);
+    } else {
+      setIsRecording(false);
+      setRecordingArchived(true);
+    }
+  };
+
+  const formatRecordingTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const rem = secs % 60;
+    return `${mins.toString().padStart(2, '0')}:${rem.toString().padStart(2, '0')}`;
+  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,18 +102,41 @@ export const LiveClassroomModal: React.FC<LiveClassroomModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Cloud Recording Controls for Session Moderator */}
+            {isRecording ? (
+              <button
+                onClick={handleToggleRecording}
+                className="px-2.5 sm:px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 animate-pulse shadow-md"
+                title="Click to stop cloud recording"
+              >
+                <CircleDot className="w-3.5 h-3.5 text-white" />
+                <span>REC {formatRecordingTime(recordingSeconds)}</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleToggleRecording}
+                className="px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all flex items-center gap-1.5 border border-slate-700"
+                title="Start cloud recording to Academy Archive"
+              >
+                <Radio className="w-3.5 h-3.5 text-red-400" />
+                <span className="hidden sm:inline">Record Summit</span>
+                <span className="sm:hidden">Rec</span>
+              </button>
+            )}
+
             {!attendanceLogged ? (
               <button
                 onClick={handleRecordAttendance}
                 className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors flex items-center gap-1.5"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Confirm Attendance</span>
+                <span className="hidden sm:inline">Confirm Attendance</span>
+                <span className="sm:hidden">Attended</span>
               </button>
             ) : (
               <span className="text-xs text-emerald-400 font-bold flex items-center gap-1 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-500/40">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Attendance Verified
+                <CheckCircle2 className="w-3.5 h-3.5" /> Verified
               </span>
             )}
 
@@ -115,15 +167,28 @@ export const LiveClassroomModal: React.FC<LiveClassroomModalProps> = ({
               Agronomists presenting from Barkly West Agro-Processing Facility. Audio and high-definition telemetry stream synchronized.
             </p>
 
-            <div className="flex items-center gap-3 mt-4 z-20">
+            <div className="flex flex-wrap items-center justify-center gap-2.5 mt-4 z-20">
               <span className="px-3 py-1 rounded-full bg-red-900/60 text-red-300 text-xs font-bold border border-red-500/40 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
                 <span>LIVE ON-AIR</span>
               </span>
-              <span className="text-xs text-slate-400 flex items-center gap-1">
+              <span className="text-xs text-slate-400 flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-full border border-slate-800">
                 <Users className="w-3.5 h-3.5 text-slate-500" /> 38 Enrolled Attendees
               </span>
+              {isRecording && (
+                <span className="text-xs text-red-300 bg-red-950/80 px-2.5 py-1 rounded-full border border-red-700/60 flex items-center gap-1.5 font-mono">
+                  <HardDrive className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+                  JaaS S3 Cloud Recording Active ({formatRecordingTime(recordingSeconds)})
+                </span>
+              )}
             </div>
+
+            {recordingArchived && (
+              <div className="mt-3 px-4 py-2 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs z-20 flex items-center gap-2 max-w-md">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Masterclass recording finalized & archived to Academy LMS Replay Vault!</span>
+              </div>
+            )}
           </div>
 
           {/* Right Live Chat Stream */}

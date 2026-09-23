@@ -10,14 +10,18 @@ import {
   UserProgress,
   AuthRole,
   EventTicket,
-  AffiliatePartner
+  AffiliatePartner,
+  Product,
+  CourseModule
 } from '../types';
 import {
   DEFAULT_USER_PROGRESS,
   SEED_SUPPLIERS,
   SEED_EVENTS,
   SEED_ARTICLES,
-  SEED_AFFILIATE_PARTNERS
+  SEED_AFFILIATE_PARTNERS,
+  SEED_PRODUCTS,
+  SEED_MODULES
 } from '../data/seedData';
 
 // Generic localStorage helper
@@ -270,4 +274,22 @@ export const loadAffiliatePartners = (defaults: AffiliatePartner[] = SEED_AFFILI
 
 export const saveAffiliatePartners = (partners: AffiliatePartner[]): void => {
   storage.set('amh_affiliates_v2', partners);
+};
+
+// Products Catalog
+export const loadProducts = (defaults: Product[] = SEED_PRODUCTS): Product[] => {
+  return storage.get<Product[]>('amh_store_products_v2', defaults);
+};
+
+export const saveProducts = (products: Product[]): void => {
+  storage.set('amh_store_products_v2', products);
+};
+
+// LMS Course Modules
+export const loadModules = (defaults: CourseModule[] = SEED_MODULES): CourseModule[] => {
+  return storage.get<CourseModule[]>('amh_lms_modules_v2', defaults);
+};
+
+export const saveModules = (modules: CourseModule[]): void => {
+  storage.set('amh_lms_modules_v2', modules);
 };

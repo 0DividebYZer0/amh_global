@@ -11,7 +11,6 @@ import {
   Heart,
   GraduationCap,
   Leaf,
-  Type,
   ChevronDown
 } from 'lucide-react';
 import { AuthRole, CurrencyCode } from '../types';
@@ -26,8 +25,6 @@ interface NavbarProps {
   userName: string;
   openAuth: (tab?: 'login' | 'register') => void;
   onLogout: () => void;
-  onToggleLargeText?: () => void;
-  isLargeText?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -38,9 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   currRole,
   userName,
   openAuth,
-  onLogout,
-  onToggleLargeText,
-  isLargeText = false
+  onLogout
 }) => {
   const { currency, setCurrency, allCurrencies } = useCurrency();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -128,8 +123,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   GLOBAL TRADERS
                 </span>
               </div>
-              <span className="text-[10px] font-semibold text-slate-500 tracking-wider uppercase block">
+              <span className="text-[10px] font-semibold text-slate-500 tracking-wider uppercase hidden sm:block">
                 Pan-African Agro-Processing · Ghana & SA Hubs · 44 Nations
+              </span>
+              <span className="text-[9px] font-semibold text-slate-500 tracking-wider uppercase block sm:hidden">
+                Accra &amp; SA Hubs · 44 Nations
               </span>
             </div>
           </button>
@@ -173,23 +171,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Right Action Controls */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Font Size Toggle for Accessibility */}
-            {onToggleLargeText && (
-              <button
-                onClick={onToggleLargeText}
-                className={`p-2 rounded-lg border text-xs font-semibold transition-all ${
-                  isLargeText
-                    ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-                title="Toggle readable typography sizing"
-                aria-label="Toggle text size"
-              >
-                <Type className="w-4 h-4 text-slate-700" />
-              </button>
-            )}
-
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             {/* Pan-African Regional Currency Switcher */}
             <div className="relative">
               <select
@@ -339,28 +321,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               </div>
             </div>
-
-            {/* Mobile Accessibility Bar */}
-            {onToggleLargeText && (
-              <div className="pt-2 px-1">
-                <button
-                  onClick={onToggleLargeText}
-                  className={`w-full py-2.5 px-3 rounded-lg border text-xs font-bold flex items-center justify-between transition-colors ${
-                    isLargeText
-                      ? 'bg-emerald-50 text-emerald-950 border-emerald-300'
-                      : 'bg-slate-50 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <Type className="w-4 h-4 text-emerald-800" />
-                    <span>Large Typography Mode</span>
-                  </span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-white border border-slate-200">
-                    {isLargeText ? 'ON' : 'OFF'}
-                  </span>
-                </button>
-              </div>
-            )}
 
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between px-2">
               <span className="text-xs text-slate-500">

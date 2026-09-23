@@ -377,7 +377,18 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                         {o.items.reduce((s, i) => s + i.qty, 0)} items
                       </td>
                       <td className="py-3 px-4 font-mono font-bold text-slate-900">
-                        R {o.total.toFixed(2)}
+                        {o.currency && o.currency !== 'ZAR' && o.currencyTotal != null ? (
+                          <div>
+                            <span className="text-emerald-800">
+                              {o.currency === 'GHS' ? 'GH₵' : '$'} {o.currencyTotal.toFixed(2)}
+                            </span>
+                            <span className="block text-[10px] text-slate-400 font-normal">
+                              R {o.total.toFixed(2)} ZAR
+                            </span>
+                          </div>
+                        ) : (
+                          <span>R {o.total.toFixed(2)}</span>
+                        )}
                       </td>
                       <td className="py-3 px-4">
                         <span

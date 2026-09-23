@@ -17,16 +17,12 @@ interface RoleDemoBannerProps {
   currentRole: AuthRole;
   currentName: string;
   onSelectRole: (role: AuthRole, name: string, email: string) => void;
-  onToggleLargeText: () => void;
-  isLargeText: boolean;
 }
 
 export const RoleDemoBanner: React.FC<RoleDemoBannerProps> = ({
   currentRole,
   currentName,
-  onSelectRole,
-  onToggleLargeText,
-  isLargeText
+  onSelectRole
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);

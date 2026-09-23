@@ -75,7 +75,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </p>
 
           {/* Large, Easy-to-tap Buttons for Everyone */}
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 pt-4 max-w-xl sm:max-w-none mx-auto">
             <button
               onClick={onOpenStore}
               className="px-6 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-sm sm:text-base transition-all flex items-center gap-2.5 shadow-xl hover:-translate-y-0.5 cursor-pointer"

@@ -207,7 +207,7 @@ export const StoreSection: React.FC<StoreSectionProps> = ({
       {/* Filter Tabs & Search Controls */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Category Segmented Control */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl overflow-x-auto max-w-full border border-slate-200">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl overflow-x-auto max-w-full border border-slate-200 scrollbar-none pb-1 sm:pb-1.5">
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -474,7 +474,7 @@ export const StoreSection: React.FC<StoreSectionProps> = ({
                           className="w-full py-2.5 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                         >
                           <Download className="w-3.5 h-3.5 text-emerald-200" />
-                          <span>Buy Digital Edition (R{product.price})</span>
+                          <span>Buy Digital Edition ({formatPrice(product.price)})</span>
                         </button>
                       </div>
                     </div>

@@ -45,6 +45,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [payMethod, setPayMethod] = useState<'PayFast' | 'EFT' | 'MobileMoney' | 'InternationalCard'>(
     currency === 'GHS' ? 'MobileMoney' : currency === 'USD' ? 'InternationalCard' : 'PayFast'
   );
+  const [mobileMoneyNetwork, setMobileMoneyNetwork] = useState<'MTN' | 'Telecel' | 'AT'>('MTN');
+  const [formError, setFormError] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState('');
 
   if (!isOpen) return null;
@@ -68,15 +70,60 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
   };
 
+  const getAfcftaLogisticsInfo = (selectedCountry: string) => {
+    switch (selectedCountry) {
+      case 'Ghana':
+        return {
+          leadTime: '1–3 Business Days',
+          hub: 'Accra Processing Center / Tema Port (West Africa Hub)',
+          duty: 'AfCFTA Rule of Origin: 0% Preferential Intra-Africa Tariff'
+        };
+      case 'South Africa':
+        return {
+          leadTime: '1–3 Business Days',
+          hub: 'Barkly West Plant / Durban Port (HQ Corridor)',
+          duty: 'Domestic SABS Standard Clearance'
+        };
+      case 'Nigeria':
+        return {
+          leadTime: '3–5 Business Days',
+          hub: 'Accra Hub to Lagos Freight Corridor',
+          duty: 'ECOWAS Protocol & AfCFTA Preferential Clearance'
+        };
+      case 'Kenya':
+        return {
+          leadTime: '4–6 Business Days',
+          hub: 'Mombasa / Nairobi Air & Sea Gateway',
+          duty: 'AfCFTA Certificate of Origin Cleared'
+        };
+      case 'Other Africa':
+        return {
+          leadTime: '5–8 Business Days',
+          hub: 'Cross-Border Dispatch across 44 AfCFTA Member States',
+          duty: 'AfCFTA Preferential Trade Agreement'
+        };
+      default:
+        return {
+          leadTime: '7–12 Business Days',
+          hub: 'Global Export via Tema Port or Durban Port',
+          duty: 'International Phytosanitary & Export Documentation Included'
+        };
+    }
+  };
+
+  const logistics = getAfcftaLogisticsInfo(country);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
     if (honeypot.trim().length > 0) {
       console.warn('Bot submission blocked');
       return;
     }
 
     if (!name.trim() || !email.trim()) {
-      alert('Please provide your name and email address.');
+      setFormError('Please provide your full name and valid email address to issue your tax invoice.');
       return;
     }
 
@@ -122,6 +169,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
         {/* Modal Body Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+          {formError && (
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between animate-in fade-in">
+              <span>{formError}</span>
+              <button
+                type="button"
+                onClick={() => setFormError(null)}
+                className="text-red-600 hover:text-red-900 text-xs font-bold underline ml-2"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           {/* Honeypot field (hidden from real users) */}
           <div className="hidden" aria-hidden="true">
             <label htmlFor="website_url">Do not fill this</label>
@@ -268,6 +328,22 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <option value="Other Africa">Other African Member State (44 Nations AfCFTA)</option>
                   <option value="International">International Export (Europe, USA, Asia, Middle East)</option>
                 </select>
+
+                {/* Dynamic AfCFTA Lead Time & Tariff Calculator Card */}
+                <div className="mt-2 p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200 text-[11px] text-emerald-950 space-y-1">
+                  <div className="flex items-center justify-between font-bold">
+                    <span className="text-emerald-800 flex items-center gap-1">
+                      <Globe2 className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>{logistics.leadTime} Est. Lead Time</span>
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-200 text-emerald-900 font-extrabold uppercase">
+                      AfCFTA Cleared
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-emerald-900 font-medium leading-tight">
+                    {logistics.hub} · {logistics.duty}
+                  </div>
+                </div>
               </div>
 
               <div className="sm:col-span-2">
@@ -339,6 +415,26 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <p className="text-[11px] text-slate-500 mt-1">
                         Direct automated checkout via MTN Mobile Money, Telecel Cash, AirtelTigo Money, and local debit cards in Ghanaian Cedi (GH₵).
                       </p>
+                      <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-emerald-100/80">
+                        <span className="text-[10px] font-bold text-slate-600">Network:</span>
+                        {(['MTN', 'Telecel', 'AT'] as const).map((net) => (
+                          <button
+                            key={net}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setMobileMoneyNetwork(net);
+                            }}
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${
+                              mobileMoneyNetwork === net
+                                ? 'bg-amber-400 text-slate-950 shadow-2xs'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            {net === 'MTN' ? 'MTN MoMo' : net === 'Telecel' ? 'Telecel Cash' : 'AT Money'}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </label>

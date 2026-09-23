@@ -482,6 +482,32 @@ export const LmsPlayer: React.FC<LmsPlayerProps> = ({
                       </div>
                     </div>
                   )}
+
+                  {currentIdx >= 5 && (
+                    /* Dynamic Modules authored in Admin Panel */
+                    <div className="w-full max-w-xl bg-slate-900/90 border border-emerald-500/40 rounded-2xl p-5 shadow-2xl text-left space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                          <Cpu className="w-4 h-4 text-emerald-400" />
+                          <span>Interactive Agro-Industrial Calibration Feed</span>
+                        </span>
+                        <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                          Module {currentIdx + 1} Interactive
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-white">{currentMod.title}</h4>
+                      <p className="text-xs text-slate-300 leading-relaxed">{currentMod.description}</p>
+                      <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+                        <span>H5P Interactive Checkpoint:</span>
+                        <button
+                          onClick={() => setH5pOpen(true)}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-colors"
+                        >
+                          Open Knowledge Checkpoint
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Simulated Audio Spectrum & State Footer */}

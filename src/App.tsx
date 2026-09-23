@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   CartItem,
   Product,
+  CourseModule,
   Order,
   HarvestYield,
   SupplierKYC,
@@ -48,7 +49,11 @@ import {
   loadTickets,
   saveTickets,
   loadAffiliatePartners,
-  saveAffiliatePartners
+  saveAffiliatePartners,
+  loadProducts,
+  saveProducts,
+  loadModules,
+  saveModules
 } from './utils/storage';
 
 // Modular UI Components
@@ -95,7 +100,8 @@ const AppContent: React.FC = () => {
   const [events, setEvents] = useState<ScheduledEvent[]>(() => loadEvents(SEED_EVENTS));
   const [contributorApps, setContributorApps] = useState<ContributorApp[]>(() => loadContributorApps());
   const [iksArticles, setIksArticles] = useState<IksArticle[]>(() => loadIksArticles(SEED_ARTICLES));
-  const [products, setProducts] = useState<Product[]>(SEED_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(() => loadProducts(SEED_PRODUCTS));
+  const [modules, setModules] = useState<CourseModule[]>(() => loadModules(SEED_MODULES));
   const [progress, setProgress] = useState<UserProgress>(() => loadProgress());
   const [auth, setAuth] = useState<{ role: AuthRole; name: string; email: string }>(() => loadAuth());
   const [tickets, setTickets] = useState<EventTicket[]>(() => loadTickets());
@@ -252,10 +258,12 @@ const AppContent: React.FC = () => {
 
     setSelectedOrder(newOrder);
 
+    // Save order immediately into state & storage
+    const updatedOrders = [newOrder, ...orders];
+    setOrders(updatedOrders);
+    saveOrders(updatedOrders);
+
     if (orderDetails.payMethod === 'EFT') {
-      const updatedOrders = [newOrder, ...orders];
-      setOrders(updatedOrders);
-      saveOrders(updatedOrders);
       handleClearCart();
       setIsInvoiceOpen(true);
       showToast(`Pro-Forma Invoice ${invNum} generated in ${orderDetails.currency}.`);
@@ -270,7 +278,7 @@ const AppContent: React.FC = () => {
       ...selectedOrder,
       status: 'Paid'
     };
-    const updatedOrders = [paidOrder, ...orders.filter((o) => o.id !== selectedOrder.id)];
+    const updatedOrders = orders.map((o) => (o.id === selectedOrder.id ? paidOrder : o));
     setOrders(updatedOrders);
     saveOrders(updatedOrders);
     setSelectedOrder(paidOrder);
@@ -492,7 +500,7 @@ const AppContent: React.FC = () => {
     return (
       <>
         <LmsPlayer
-          modules={SEED_MODULES}
+          modules={modules}
           progress={progress}
           onBackToPortal={() => setIsLmsPlayerOpen(false)}
           onCompleteModule={handleCompleteModule}
@@ -513,7 +521,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-950 ${isLargeText ? 'text-base sm:text-lg leading-relaxed' : ''}`}>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased selection:bg-emerald-200 selection:text-emerald-950">
       {/* Primary Global Navigation */}
       <Navbar
         currentTab={currentTab}
@@ -524,8 +532,6 @@ const AppContent: React.FC = () => {
         userName={auth.name}
         openAuth={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
-        onToggleLargeText={() => setIsLargeText(!isLargeText)}
-        isLargeText={isLargeText}
       />
 
       {/* Main Routed Stage */}
@@ -594,10 +600,18 @@ const AppContent: React.FC = () => {
         )}
 
         {/* User Role Dashboards */}
-        {(currentTab === 'farmer' || currentTab === 'outgrower') && (
+        {currentTab === 'farmer' && (
           <FarmerPortal
             farmerName={auth.name || 'David Van Zyl'}
             farmName="Vaal River Agro Estates (Plot 14, Barkly West)"
+            yields={yields}
+            onSubmitYield={handleSubmitYield}
+            onShowToast={showToast}
+          />
+        )}
+
+        {currentTab === 'outgrower' && (
+          <OutgrowerPortal
             yields={yields}
             onSubmitYield={handleSubmitYield}
             onShowToast={showToast}
@@ -642,7 +656,7 @@ const AppContent: React.FC = () => {
         {currentTab === 'student' && (
           <StudentPortal
             progress={progress}
-            modules={SEED_MODULES}
+            modules={modules}
             orders={orders}
             tickets={tickets}
             userName={auth.name}
@@ -666,8 +680,15 @@ const AppContent: React.FC = () => {
             events={events}
             contributorApps={contributorApps}
             iksArticles={iksArticles}
-            modules={SEED_MODULES}
-            onUpdateProducts={setProducts}
+            modules={modules}
+            onUpdateProducts={(newProds) => {
+              setProducts(newProds);
+              saveProducts(newProds);
+            }}
+            onUpdateModules={(newMods) => {
+              setModules(newMods);
+              saveModules(newMods);
+            }}
             onUpdateEvents={(evs) => {
               setEvents(evs);
               saveEvents(evs);
@@ -675,6 +696,18 @@ const AppContent: React.FC = () => {
             onUpdateIksArticles={(arts) => {
               setIksArticles(arts);
               saveIksArticles(arts);
+            }}
+            onUpdateOrders={(newOrders) => {
+              setOrders(newOrders);
+              saveOrders(newOrders);
+            }}
+            onViewInvoice={(ord) => {
+              setSelectedOrder(ord);
+              setIsInvoiceOpen(true);
+            }}
+            onStartLiveSession={(ev) => {
+              setSelectedLiveEvent(ev);
+              setIsLiveClassOpen(true);
             }}
             onApproveSupplier={handleApproveSupplier}
             onRejectSupplier={handleRejectSupplier}
@@ -806,8 +839,6 @@ const AppContent: React.FC = () => {
           currentRole={auth.role}
           currentName={auth.name}
           onSelectRole={handleSelectRole}
-          onToggleLargeText={() => setIsLargeText(!isLargeText)}
-          isLargeText={isLargeText}
         />
       )}
     </div>

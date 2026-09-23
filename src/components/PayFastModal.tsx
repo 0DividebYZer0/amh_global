@@ -33,6 +33,20 @@ export const PayFastModal: React.FC<PayFastModalProps> = ({
   const [cardExpiry, setCardExpiry] = useState('12/28');
   const [cardCvv, setCardCvv] = useState('123');
 
+  React.useEffect(() => {
+    if (order) {
+      if (order.currency === 'GHS') {
+        setActiveTab('momo');
+      } else if (order.currency === 'USD') {
+        setActiveTab('card');
+      } else {
+        setActiveTab('card');
+      }
+      if (order.phone) setMomoNumber(order.phone);
+      if (order.name) setCardHolder(order.name.toUpperCase());
+    }
+  }, [order]);
+
   if (!isOpen || !order) return null;
 
   const displayAmount = order.currencyTotal
@@ -47,10 +61,11 @@ export const PayFastModal: React.FC<PayFastModalProps> = ({
 
   const handleSimulatePayment = () => {
     setIsProcessing(true);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsProcessing(false);
       onPaymentSuccess();
     }, 1500);
+    return () => clearTimeout(timer);
   };
 
   const banks = ['FNB', 'Capitec Pay', 'Standard Bank', 'ABSA', 'Nedbank', 'Investec'];

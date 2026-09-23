@@ -38,6 +38,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [selectedRoleType, setSelectedRoleType] = useState<AuthRole>('farmer');
   const [rememberMe, setRememberMe] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
 
   // Register form state
   const [regName, setRegName] = useState('');
@@ -160,9 +161,53 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         <div className="p-6">
+          {/* Quick Demo Access (1-Click Login) */}
+          {tab === 'login' && (
+            <div className="mb-5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                  ⚡ 1-Click Instant Demo Login (Choose Role)
+                </span>
+                <span className="text-[10px] text-emerald-800 font-bold">Auto-fills credentials</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {[
+                  { name: 'Admin', role: 'admin' as AuthRole, email: 'admin@amhglobal.com', pass: 'Admin2026', label: 'Executive Admin' },
+                  { name: 'David (Farmer)', role: 'farmer' as AuthRole, email: 'david@vaalriver.co.za', pass: 'Farmer2026', label: 'Outgrower' },
+                  { name: 'Marcelle (B2B)', role: 'manufacturer' as AuthRole, email: 'marcelle@capebotanicals.co.za', pass: 'Cape2026', label: 'Wholesale Buyer' },
+                  { name: 'Thabo (Student)', role: 'student' as AuthRole, email: 'thabo@gmail.com', pass: 'Student2026', label: 'Student Portal' },
+                  { name: 'Gogo Nomvula', role: 'community' as AuthRole, email: 'gogo@sanctuary.org', pass: 'Elder2026', label: 'IKS Lore' },
+                ].map((acc) => (
+                  <button
+                    key={acc.role}
+                    type="button"
+                    onClick={() => {
+                      setLoginEmail(acc.email);
+                      setLoginPass(acc.pass);
+                      onLoginSuccess(acc.role, acc.name, acc.email);
+                      onClose();
+                    }}
+                    className="p-2 text-left rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:bg-emerald-50/50 transition-all text-xs group"
+                  >
+                    <div className="font-bold text-slate-900 group-hover:text-emerald-900 text-[11px] truncate">
+                      {acc.name}
+                    </div>
+                    <div className="text-[10px] text-slate-500 truncate">{acc.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {loginError && (
             <div className="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200">
               {loginError}
+            </div>
+          )}
+
+          {resetSent && (
+            <div className="mb-4 p-3 bg-emerald-50 text-emerald-800 text-xs rounded-xl border border-emerald-200">
+              Password reset link has been dispatched to {loginEmail || 'your email'}.
             </div>
           )}
 
@@ -192,7 +237,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </label>
                   <button
                     type="button"
-                    onClick={() => alert('Password reset link sent to your registered email.')}
+                    onClick={() => setResetSent(true)}
                     className="text-[11px] text-emerald-800 hover:underline font-semibold"
                   >
                     Forgot Password?

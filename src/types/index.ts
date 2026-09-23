@@ -35,6 +35,8 @@ export interface CartItem {
 }
 
 export interface H5PCheckpoint {
+  type?: 'quiz' | 'interactive_video' | 'drag_drop' | 'scenario';
+  timestampSeconds?: number;
   question: string;
   choices: string[];
   correctIndex: number;
@@ -153,6 +155,11 @@ export interface ScheduledEvent {
   published: boolean;
   category?: 'Live Training' | 'Bootcamp' | 'Industry Summit' | 'Summit';
   location?: string;
+  hostName?: string;
+  recordingMode?: 'Cloud JaaS' | 'Jibri S3' | 'Disabled';
+  recordingStatus?: 'Not Recorded' | 'Recording Active' | 'Recorded & Archived';
+  recordingUrl?: string;
+  tenantHub?: 'All' | 'Ghana' | 'South Africa' | 'Kenya';
   ticketTiers?: { name: string; price: number; description: string; availableSeats: number }[];
 }
 

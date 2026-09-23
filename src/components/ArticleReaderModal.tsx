@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Calendar, User, BookOpen, Share2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Calendar, User, BookOpen, Share2, CheckCircle2 } from 'lucide-react';
 import { IksArticle } from '../types';
 
 interface ArticleReaderModalProps {
@@ -11,7 +11,22 @@ export const ArticleReaderModal: React.FC<ArticleReaderModalProps> = ({
   article,
   onClose
 }) => {
+  const [copied, setCopied] = useState(false);
+
   if (!article) return null;
+
+  const handleShare = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(window.location.href);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
@@ -77,14 +92,24 @@ export const ArticleReaderModal: React.FC<ArticleReaderModalProps> = ({
           <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <span>Preserved under the AMH Open-Access Indigenous Stewardship Policy.</span>
             <button
-              onClick={() => {
-                navigator.clipboard?.writeText(window.location.href);
-                alert('Article reference link copied to clipboard.');
-              }}
-              className="px-3.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold flex items-center gap-1.5 transition-colors"
+              onClick={handleShare}
+              className={`px-3.5 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                copied
+                  ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
+                  : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+              }`}
             >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>Share Reference</span>
+              {copied ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share Reference</span>
+                </>
+              )}
             </button>
           </div>
         </div>
